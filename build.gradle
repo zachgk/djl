@@ -41,7 +41,7 @@ configure(javaProjects()) {
     apply from: file("${rootProject.projectDir}/tools/gradle/check.gradle")
 
     test {
-        maxHeapSize = "2048m"
+        maxHeapSize = "4096m"
         doFirst {
             if (JavaVersion.current() != JavaVersion.VERSION_1_8) {
                 jvmArgs = [
