@@ -19,67 +19,87 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-/** The simple implementation of Vocabulary. */
-public class SimpleVocabulary implements Vocabulary {
+/** The default implementation of Vocabulary. */
+public class DefaultVocabulary implements Vocabulary {
 
     private Map<String, TokenInfo> tokens = new ConcurrentHashMap<>();
     private List<String> indexToToken = new ArrayList<>();
     private Set<String> reservedTokens;
-    private int minFrequency;
     private String unknownToken;
 
     /**
-     * Create a {@code SimpleVocabulary} object with a {@link Builder}.
-     *
-     * @param builder the {@link Builder} to build the vocabulary with
-     */
-    public SimpleVocabulary(Builder builder) {
-        reservedTokens = builder.reservedTokens;
-        minFrequency = builder.minFrequency;
-        unknownToken = builder.unknownToken;
-        reservedTokens.add(unknownToken);
-        addTokens(reservedTokens);
-        for (List<String> sentence : builder.sentences) {
-            for (String word : sentence) {
-                addWord(word);
-            }
-        }
-    }
-
-    /**
-     * Create a {@code SimpleVocabulary} object with the given list of tokens.
+     * Create a {@code DefaultVocabulary} object with the given list of tokens.
      *
      * @param tokens the {@link List} of tokens to build the vocabulary with
      */
-    public SimpleVocabulary(List<String> tokens) {
-        reservedTokens = new HashSet<>();
-        minFrequency = 10;
-        unknownToken = "<unk>";
-        reservedTokens.add(unknownToken);
-        addTokens(reservedTokens);
-        addTokens(tokens);
+    public DefaultVocabulary(List<String> tokens) {
+        this(builder().add(tokens));
     }
 
-    private void addWord(String token) {
+    /**
+     * Create a {@code DefaultVocabulary} object with a {@link Builder}.
+     *
+     * @param builder the {@link Builder} to build the vocabulary with
+     */
+    public DefaultVocabulary(Builder builder) {
+        reservedTokens = builder.reservedTokens;
+        unknownToken = builder.unknownToken;
+        reservedTokens.add(unknownToken);
+        addReservedTokens(reservedTokens);
+        for (List<String> sentence : builder.sentences) {
+            for (String token : sentence) {
+                addToken(token);
+            }
+        }
+        pruneTokens(builder.minFrequency, builder.maxTokens);
+        for (Entry<String, TokenInfo> token : tokens.entrySet()) {
+            token.getValue().index = tokens.size();
+            indexToToken.add(token.getKey());
+        }
+    }
+
+    private void addToken(String token) {
         if (reservedTokens.contains(token)) {
             return;
         }
         TokenInfo tokenInfo = tokens.getOrDefault(token, new TokenInfo());
-        if (++tokenInfo.frequency == minFrequency) {
-            tokenInfo.index = tokens.size();
-            indexToToken.add(token);
-        }
-        tokens.put(token, tokenInfo);
+        tokenInfo.frequency++;
     }
 
-    private void addTokens(Collection<String> tokens) {
+    private void pruneTokens(int minFrequency, int maxSize) {
+        // Prune tokens below min frequency
+        if (minFrequency > 1) {
+            for (Entry<String, TokenInfo> token : tokens.entrySet()) {
+                if (token.getValue().frequency < minFrequency) {
+                    tokens.remove(token.getKey());
+                }
+            }
+        }
+
+        // Prune number of tokens to maxSize
+        if (maxSize > 0 && tokens.size() > maxSize) {
+            tokens.entrySet()
+                    .stream()
+                    .sorted(
+                            Map.Entry.comparingByValue(
+                                    Comparator.comparingInt(
+                                            tokenInfo ->
+                                                    -tokenInfo.frequency))) // most frequent first
+                    .skip(maxSize)
+                    .forEach(token -> tokens.remove(token.getKey()));
+        }
+    }
+
+    private void addReservedTokens(Collection<String> tokens) {
         for (String token : tokens) {
             TokenInfo tokenInfo = new TokenInfo();
             tokenInfo.frequency = Integer.MAX_VALUE;
@@ -109,9 +129,7 @@ public class SimpleVocabulary implements Vocabulary {
     public long getIndex(String token) {
         if (tokens.containsKey(token)) {
             TokenInfo tokenInfo = tokens.get(token);
-            if (tokenInfo.frequency >= minFrequency) {
-                return tokenInfo.index;
-            }
+            return tokenInfo.index;
         }
         return tokens.get(unknownToken).index;
     }
@@ -123,7 +141,7 @@ public class SimpleVocabulary implements Vocabulary {
     }
 
     /**
-     * Creates a new builder to build a {@code SimpleVocabulary}.
+     * Creates a new builder to build a {@code DefaultVocabulary}.
      *
      * @return a new builder
      */
@@ -131,26 +149,41 @@ public class SimpleVocabulary implements Vocabulary {
         return new Builder();
     }
 
-    /** Builder class that is used to build the {@link SimpleVocabulary}. */
+    /** Builder class that is used to build the {@link DefaultVocabulary}. */
     public static final class Builder {
 
         List<List<String>> sentences = new ArrayList<>();
         Set<String> reservedTokens = new HashSet<>();
-        int minFrequency = 10;
+        int minFrequency = -1;
+        int maxTokens = -1;
         String unknownToken = "<unk>";
 
         private Builder() {}
 
         /**
          * Sets the optional parameter that specifies the minimum frequency to consider a token to
-         * be part of the {@link SimpleVocabulary}. Defaults to 10.
+         * be part of the {@link DefaultVocabulary}. Defaults to no minimum.
          *
          * @param minFrequency the minimum frequency to consider a token to be part of the {@link
-         *     SimpleVocabulary}
+         *     DefaultVocabulary} or -1 for no minimum
          * @return this {@code VocabularyBuilder}
          */
         public Builder optMinFrequency(int minFrequency) {
             this.minFrequency = minFrequency;
+            return this;
+        }
+
+        /**
+         * Sets the optional limit on the size of the vocabulary.
+         *
+         * <p>The size includes the reservedTokens. If the number of added tokens exceeds the
+         * maxToken limit, it keeps the most frequent tokens.
+         *
+         * @param maxTokens the maximum number of tokens or -1 for no maximum
+         * @return this {@link Builder}
+         */
+        public Builder optMaxTokens(int maxTokens) {
+            this.maxTokens = maxTokens;
             return this;
         }
 
@@ -177,7 +210,7 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Adds the given sentence to the {@link SimpleVocabulary}.
+         * Adds the given sentence to the {@link DefaultVocabulary}.
          *
          * @param sentence the sentence to be added
          * @return this {@code VocabularyBuilder}
@@ -188,7 +221,7 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Adds the given list of sentences to the {@link SimpleVocabulary}.
+         * Adds the given list of sentences to the {@link DefaultVocabulary}.
          *
          * @param sentences the list of sentences to be added
          * @return this {@code VocabularyBuilder}
@@ -199,7 +232,7 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Adds a text vocabulary to the {@link SimpleVocabulary}.
+         * Adds a text vocabulary to the {@link DefaultVocabulary}.
          *
          * <pre>
          *   Example text file(vocab.txt):
@@ -219,7 +252,7 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Adds a text vocabulary to the {@link SimpleVocabulary}.
+         * Adds a text vocabulary to the {@link DefaultVocabulary}.
          *
          * @param url the text file url
          * @return this {@code VocabularyBuilder}
@@ -233,7 +266,7 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Adds a customized vocabulary to the {@link SimpleVocabulary}.
+         * Adds a customized vocabulary to the {@link DefaultVocabulary}.
          *
          * @param url the text file url
          * @param lambda the function to parse the vocabulary file
@@ -244,17 +277,21 @@ public class SimpleVocabulary implements Vocabulary {
         }
 
         /**
-         * Builds the {@link SimpleVocabulary} object with the set arguments.
+         * Builds the {@link DefaultVocabulary} object with the set arguments.
          *
-         * @return the {@link SimpleVocabulary} object built
+         * @return the {@link DefaultVocabulary} object built
          */
-        public SimpleVocabulary build() {
-            return new SimpleVocabulary(this);
+        public DefaultVocabulary build() {
+            if (maxTokens > 0 && maxTokens < reservedTokens.size()) {
+                throw new IllegalArgumentException(
+                        "The vocabulary maxTokens can not be smaller than the number of reserved tokens");
+            }
+            return new DefaultVocabulary(this);
         }
     }
 
     /**
-     * {@code TokenInfo} represents the information stored in the {@link SimpleVocabulary} about a
+     * {@code TokenInfo} represents the information stored in the {@link DefaultVocabulary} about a
      * given token.
      */
     private static final class TokenInfo {

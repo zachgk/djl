@@ -22,7 +22,7 @@ import ai.djl.engine.Engine;
 import ai.djl.examples.training.util.Arguments;
 import ai.djl.inference.Predictor;
 import ai.djl.metric.Metrics;
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.bert.BertFullTokenizer;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
@@ -89,9 +89,8 @@ public final class TrainAmazonReviewRanking {
         try (Model model = Model.newInstance("AmazonReviewRatingClassification");
                 ZooModel<NDList, NDList> embedding = ModelZoo.loadModel(criteria)) {
             // Prepare the vocabulary
-            SimpleVocabulary vocabulary =
-                    SimpleVocabulary.builder()
-                            .optMinFrequency(1)
+            DefaultVocabulary vocabulary =
+                    DefaultVocabulary.builder()
                             .addFromTextFile(embedding.getArtifact("vocab.txt"))
                             .optUnknownToken("[UNK]")
                             .build();
@@ -225,7 +224,7 @@ public final class TrainAmazonReviewRanking {
         /** {@inheritDoc} */
         @Override
         public void featurize(DynamicBuffer buf, String input) {
-            SimpleVocabulary vocab = tokenizer.getVocabulary();
+            DefaultVocabulary vocab = tokenizer.getVocabulary();
             List<String> tokens = tokenizer.tokenize(input.toLowerCase(Locale.ENGLISH));
             tokens = tokens.size() > maxLength ? tokens.subList(0, maxLength) : tokens;
             buf.put(vocab.getIndex("[CLS]"));

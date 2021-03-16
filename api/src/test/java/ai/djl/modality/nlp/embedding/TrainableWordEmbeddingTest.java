@@ -12,7 +12,7 @@
  */
 package ai.djl.modality.nlp.embedding;
 
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.preprocess.SimpleTokenizer;
 import ai.djl.ndarray.NDManager;
 import org.testng.Assert;
@@ -29,7 +29,7 @@ public class TrainableWordEmbeddingTest {
         TrainableWordEmbedding trainableWordEmbedding =
                 TrainableWordEmbedding.builder()
                         .setVocabulary(
-                                new SimpleVocabulary(new SimpleTokenizer().tokenize(TEST_STRING)))
+                                new DefaultVocabulary(new SimpleTokenizer().tokenize(TEST_STRING)))
                         .optNumEmbeddings(10)
                         .optUseDefault(true)
                         .build();

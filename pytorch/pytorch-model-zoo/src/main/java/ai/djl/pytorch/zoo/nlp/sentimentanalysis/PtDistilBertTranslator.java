@@ -14,7 +14,7 @@ package ai.djl.pytorch.zoo.nlp.sentimentanalysis;
 
 import ai.djl.Model;
 import ai.djl.modality.Classifications;
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.Vocabulary;
 import ai.djl.modality.nlp.bert.BertTokenizer;
 import ai.djl.ndarray.NDArray;
@@ -50,11 +50,7 @@ public class PtDistilBertTranslator implements Translator<String, Classification
     public void prepare(NDManager manager, Model model) throws IOException {
         URL url = model.getArtifact("distilbert-base-uncased-finetuned-sst-2-english-vocab.txt");
         vocabulary =
-                SimpleVocabulary.builder()
-                        .optMinFrequency(1)
-                        .addFromTextFile(url)
-                        .optUnknownToken("[UNK]")
-                        .build();
+                DefaultVocabulary.builder().addFromTextFile(url).optUnknownToken("[UNK]").build();
         tokenizer = new BertTokenizer();
     }
 

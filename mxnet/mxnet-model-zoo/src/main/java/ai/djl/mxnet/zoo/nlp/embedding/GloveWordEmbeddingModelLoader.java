@@ -17,7 +17,7 @@ import ai.djl.Application.NLP;
 import ai.djl.Device;
 import ai.djl.MalformedModelException;
 import ai.djl.Model;
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.embedding.TrainableWordEmbedding;
 import ai.djl.modality.nlp.embedding.WordEmbedding;
 import ai.djl.mxnet.zoo.MxModelZoo;
@@ -72,7 +72,7 @@ public class GloveWordEmbeddingModelLoader extends BaseModelLoader {
                 TrainableWordEmbedding.builder()
                         .optNumEmbeddings(
                                 Integer.parseInt(artifact.getProperties().get("dimensions")))
-                        .setVocabulary(new SimpleVocabulary(idxToToken))
+                        .setVocabulary(new DefaultVocabulary(idxToToken))
                         .optUnknownToken((String) arguments.get("unknownToken"))
                         .optUseDefault(true)
                         .build();

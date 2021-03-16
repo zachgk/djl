@@ -17,6 +17,7 @@ import ai.djl.ModelException;
 import ai.djl.basicdataset.nlp.CookingStackExchange;
 import ai.djl.fasttext.zoo.FtModelZoo;
 import ai.djl.modality.Classifications;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.Shape;
@@ -30,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -90,7 +92,8 @@ public class CookingStackExchangeTest {
 
             FtModel ftModel = (FtModel) model.getWrappedModel();
             FtWord2VecWordEmbedding fasttextWord2VecWordEmbedding =
-                    new FtWord2VecWordEmbedding(ftModel, new FtVocabulary());
+                    new FtWord2VecWordEmbedding(
+                            ftModel, new DefaultVocabulary(Arrays.asList("bread")));
             long index = fasttextWord2VecWordEmbedding.preprocessWordToEmbed("bread");
             NDArray embedding = fasttextWord2VecWordEmbedding.embedWord(manager, index);
             Assert.assertEquals(embedding.getShape(), new Shape(100));

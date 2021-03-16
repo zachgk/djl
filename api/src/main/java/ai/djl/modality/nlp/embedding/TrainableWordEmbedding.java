@@ -12,7 +12,7 @@
  */
 package ai.djl.modality.nlp.embedding;
 
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.Vocabulary;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.types.SparseFormat;
@@ -23,7 +23,7 @@ import java.util.Optional;
 
 /**
  * {@code TrainableWordEmbedding} is an implementation of {@link WordEmbedding} and {@link
- * Embedding} based on a {@link SimpleVocabulary}. This {@link WordEmbedding} is ideal when there
+ * Embedding} based on a {@link DefaultVocabulary}. This {@link WordEmbedding} is ideal when there
  * are no pre-trained embeddings available.
  */
 public class TrainableWordEmbedding extends Embedding<String> implements WordEmbedding {
@@ -41,7 +41,7 @@ public class TrainableWordEmbedding extends Embedding<String> implements WordEmb
     }
 
     /**
-     * Constructs a new instance of {@code TrainableWordEmbedding} from a {@link SimpleVocabulary}
+     * Constructs a new instance of {@code TrainableWordEmbedding} from a {@link DefaultVocabulary}
      * and a given embedding size.
      *
      * @param vocabulary a {@link Vocabulary} to get tokens from
@@ -65,7 +65,7 @@ public class TrainableWordEmbedding extends Embedding<String> implements WordEmb
     public TrainableWordEmbedding(NDArray embedding, List<String> items) {
         super(embedding);
         this.fallthroughEmbedding = new DefaultItem(DEFAULT_UNKNOWN_TOKEN);
-        this.vocabulary = new SimpleVocabulary(items);
+        this.vocabulary = new DefaultVocabulary(items);
     }
 
     /**
@@ -79,7 +79,7 @@ public class TrainableWordEmbedding extends Embedding<String> implements WordEmb
             NDArray embedding, List<String> items, SparseFormat sparseFormat) {
         super(embedding, sparseFormat);
         this.fallthroughEmbedding = new DefaultItem(DEFAULT_UNKNOWN_TOKEN);
-        this.vocabulary = new SimpleVocabulary(items);
+        this.vocabulary = new DefaultVocabulary(items);
     }
 
     /** {@inheritDoc} */

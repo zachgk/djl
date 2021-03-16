@@ -16,7 +16,7 @@ import ai.djl.MalformedModelException;
 import ai.djl.Model;
 import ai.djl.engine.Engine;
 import ai.djl.integration.util.TestUtils;
-import ai.djl.modality.nlp.SimpleVocabulary;
+import ai.djl.modality.nlp.DefaultVocabulary;
 import ai.djl.modality.nlp.embedding.TrainableWordEmbedding;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
@@ -238,7 +238,7 @@ public class BlockCoreTest {
 
         TrainableWordEmbedding block =
                 TrainableWordEmbedding.builder()
-                        .setVocabulary(new SimpleVocabulary(Arrays.asList("a", "b", "c")))
+                        .setVocabulary(new DefaultVocabulary(Arrays.asList("a", "b", "c")))
                         .setEmbeddingSize(2)
                         .build();
         try (Model model = Model.newInstance("model")) {
