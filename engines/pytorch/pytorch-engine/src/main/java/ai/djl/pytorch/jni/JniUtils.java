@@ -14,6 +14,7 @@ package ai.djl.pytorch.jni;
 
 import ai.djl.Device;
 import ai.djl.ndarray.NDList;
+import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.DataType;
 import ai.djl.ndarray.types.Shape;
 import ai.djl.ndarray.types.SparseFormat;
@@ -1392,6 +1393,17 @@ public final class JniUtils {
     public static void writeModule(PtSymbolBlock block, OutputStream os, boolean writeSize) {
         byte[] buf = new byte[BYTE_LENGTH];
         PyTorchLibrary.LIB.moduleWrite(block.getHandle(), os, buf, writeSize);
+    }
+
+    public static PtSymbolBlock cloneModule(PtNDManager manager, PtSymbolBlock block) {
+        long newModule = PyTorchLibrary.LIB.moduleClone(block.getHandle());
+        return new PtSymbolBlock(manager, newModule);
+    }
+
+    public static PtSymbolBlock cloneModule(PtNDManager manager, PtSymbolBlock block, Device device) {
+        int[] ptDevie = {PtDeviceType.toDeviceType(device), device.getDeviceId()};
+        long newModule = PyTorchLibrary.LIB.moduleClone(block.getHandle(), ptDevie);
+        return new PtSymbolBlock(manager, newModule);
     }
 
     public static NDList moduleGetParams(PtSymbolBlock block, PtNDManager manager) {

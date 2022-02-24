@@ -12,6 +12,7 @@
  */
 package ai.djl.pytorch.engine;
 
+import ai.djl.Device;
 import ai.djl.MalformedModelException;
 import ai.djl.ndarray.NDArray;
 import ai.djl.ndarray.NDList;
@@ -155,6 +156,12 @@ public class PtSymbolBlock extends AbstractSymbolBlock implements AutoCloseable 
                             + "and call describeOutput again.");
         }
         return outputDescriptions;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public SymbolBlock toDevice(Device device) {
+        return JniUtils.cloneModule(manager.newSubManager(device), this, device);
     }
 
     /** {@inheritDoc} */

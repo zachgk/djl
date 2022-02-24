@@ -202,6 +202,23 @@ JNIEXPORT jlong JNICALL Java_ai_djl_pytorch_jni_PyTorchLibrary_moduleForward(
   API_END_RETURN()
 }
 
+JNIEXPORT jlong JNICALL Java_ai_djl_pytorch_jni_PyTorchLibrary_moduleClone__J(
+    JNIEnv* env, jobject jthis, jlong jhandle) {
+  API_BEGIN()
+  auto* module_ptr = reinterpret_cast<torch::jit::script::Module*>(jhandle);
+  return reinterpret_cast<uintptr_t>(module_ptr->clone());
+  API_END_RETURN()
+}
+
+JNIEXPORT jlong JNICALL Java_ai_djl_pytorch_jni_PyTorchLibrary_moduleClone__JI_2_3(
+    JNIEnv* env, jobject jthis, jlong jhandle, jintArray jdevice) {
+  API_BEGIN()
+  auto* module_ptr = reinterpret_cast<torch::jit::script::Module*>(jhandle);
+  const torch::Device device = utils::GetDeviceFromJDevice(env, jdevice);
+  return reinterpret_cast<uintptr_t>(module_ptr->clone(device));
+  API_END_RETURN()
+}
+
 JNIEXPORT void JNICALL Java_ai_djl_pytorch_jni_PyTorchLibrary_torchDeleteModule(
     JNIEnv* env, jobject jthis, jlong jhandle) {
   API_BEGIN()

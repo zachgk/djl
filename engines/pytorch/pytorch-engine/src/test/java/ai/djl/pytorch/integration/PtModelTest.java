@@ -80,8 +80,8 @@ public class PtModelTest {
                 .optDevice(Device.cpu())
                 .build();
         try(ZooModel<Input, Output> model = criteria.loadModel()) {
-            try(Predictor<Input, Output> predictor = model.newPredictor(Device.cpu())) {
-                try( NDManager man = model.getNDManager().newSubManager(Device.cpu())) {
+            try(Predictor<Input, Output> predictor = model.newPredictor(Device.gpu())) {
+                try( NDManager man = model.getNDManager().newSubManager(Device.gpu())) {
                     // Path path = Paths.get("/Users/kimbergz/Downloads/zeros_1_3_224_224.ndlist");
                     // NDArray array = man.decode(new FileInputStream(path.toFile()));
                     NDArray array = man.ones(new Shape(3, 224, 224), DataType.UINT8);

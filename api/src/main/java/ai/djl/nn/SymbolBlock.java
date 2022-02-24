@@ -12,6 +12,7 @@
  */
 package ai.djl.nn;
 
+import ai.djl.Device;
 import ai.djl.ndarray.NDManager;
 import ai.djl.ndarray.types.Shape;
 import ai.djl.util.PairList;
@@ -45,4 +46,6 @@ public interface SymbolBlock extends Block {
     default PairList<String, Shape> describeOutput() {
         throw new UnsupportedOperationException("not supported");
     }
+
+    SymbolBlock toDevice(Device device);
 }

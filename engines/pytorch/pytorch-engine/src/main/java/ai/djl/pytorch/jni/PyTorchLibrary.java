@@ -486,6 +486,10 @@ final class PyTorchLibrary {
 
     native long moduleForward(long moduleHandle, long[] iValueHandles, boolean isTrain);
 
+    native long moduleClone(long moduleHandle);
+
+    native long moduleClone(long moduleHandle, int[] device);
+
     native void setGraphExecutorOptimize(boolean enabled);
 
     native void moduleWrite(long moduleHandle, OutputStream os, byte[] buffer, boolean writeSize);
