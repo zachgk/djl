@@ -19,7 +19,8 @@ configure([
         project(':tensorflow:tensorflow-engine'),
         project(':tensorflow:tensorflow-model-zoo'),
         project(':tflite:tflite-engine'),
-        project(':ml:xgboost')]) {
+        project(':ml:xgboost'),
+        project(':ml:lightgbm')]) {
     apply plugin: "maven-publish"
     apply plugin: "signing"
 
