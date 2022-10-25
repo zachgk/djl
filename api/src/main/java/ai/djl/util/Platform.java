@@ -26,6 +26,7 @@ public final class Platform {
 
     private String version;
     private String osPrefix;
+    private String osArch;
     private String flavor;
     private String cudaArch;
     private String[] libraries;
@@ -86,6 +87,10 @@ public final class Platform {
         } else {
             throw new AssertionError("Unsupported platform: " + osName);
         }
+        platform.osArch = System.getProperty("os.arch");
+        if ("amd64".equals(platform.osArch)) {
+            platform.osArch = "x86_64";
+        }
         if (CudaUtils.getGpuCount() > 0) {
             platform.flavor = "cu" + CudaUtils.getCudaVersionString();
             platform.cudaArch = CudaUtils.getComputeCapability(0);
@@ -114,6 +119,15 @@ public final class Platform {
     }
 
     /**
+     * Returns the os architecture (x86_64, aar64, etc).
+     *
+     * @return the os architecture (x86_64, aar64, etc)
+     */
+    public String getOsArch() {
+        return osArch;
+    }
+
+    /**
      * Returns the MXNet build flavor.
      *
      * @return the MXNet build flavor
@@ -128,7 +142,7 @@ public final class Platform {
      * @return the classifier for the platform
      */
     public String getClassifier() {
-        return osPrefix + "-x86_64";
+        return osPrefix + "-" + osArch;
     }
 
     /**
@@ -165,7 +179,7 @@ public final class Platform {
      * @return true if the platforms match
      */
     public boolean matches(Platform system) {
-        if (!osPrefix.equals(system.osPrefix)) {
+        if (!osPrefix.equals(system.osPrefix) || !osArch.equals(system.osArch)) {
             return false;
         }
         // if system Machine is GPU
