@@ -15,6 +15,7 @@ package ai.djl.ml.lightgbm.jni;
 import ai.djl.engine.EngineException;
 import ai.djl.util.Platform;
 import ai.djl.util.Utils;
+import com.microsoft.ml.lightgbm.lightgbmlib;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -66,9 +67,9 @@ public final class LibUtils {
                 Files.createDirectories(cacheFolder);
             }
 
-            resourcePath = "com/microsoft/ml/lightgbm/" + resourcePath;
+            resourcePath = "/com/microsoft/ml/lightgbm/" + resourcePath;
             Path tmp = Files.createTempDirectory("lightgbm-" + name).resolve(name);
-            try (InputStream is = LibUtils.class.getResourceAsStream(resourcePath)) {
+            try (InputStream is = lightgbmlib.class.getResourceAsStream(resourcePath)) {
                 Files.copy(is, tmp, StandardCopyOption.REPLACE_EXISTING);
             }
             Utils.moveQuietly(tmp, libFile);
