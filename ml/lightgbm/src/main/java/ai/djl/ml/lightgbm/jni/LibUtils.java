@@ -35,8 +35,9 @@ public final class LibUtils {
     public static synchronized void loadNative() throws IOException {
         Platform platform = Platform.fromSystem();
 
-        if (!"x86_64".equals(platform.getOsArch())) {
-            throw new IllegalStateException("Only x86 is supported");
+        String osArch = System.getProperty("os.arch");
+        if (!("x86_64".equals(osArch) || "amd64".equals(osArch))) {
+            throw new IllegalStateException("Only x86/amd64 is supported");
         }
 
         if ("linux".equals(platform.getOsPrefix())) {
